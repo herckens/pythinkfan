@@ -8,15 +8,19 @@ import datetime
 LOG_FILENAME = "/tmp/tpfan_log.txt"
 timestep=1.0 # in [s] sleep time between samples
 temp_desired = 60
-temp_critical = 90
+temp_desired_forIntegral = 75
 hysteresis = 0.6
 ### PID parameters: ###
-p = 0.28
+pid_P = 0.28
+pid_I = 0.01
+pid_integral_max = 7
+pid_integral_min = 0
 #####################
  
 # Do not change
 logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
 level_old = 0.0
+integral = 0.0
  
 
 def get_maxtemp():
@@ -64,14 +68,22 @@ while 1:
     
     error = maxtemp - temp_desired
     print("error = " + str(error))
+    error_forIntegral = maxtemp - temp_desired_forIntegral
+    print("error_forIntegral = " + str(error_forIntegral))
+    integral += pid_I * error_forIntegral
+    if integral > pid_integral_max:
+      integral = pid_integral_max
+    if integral < pid_integral_min:
+      integral = pid_integral_min
+    print("integral = " + str(integral))
 
-    level = p * error
+    level = pid_P * error + integral
     print("level = " + str(level))
     if level > 7.0:
       level = 7
     if level < 0:
       level = 0
-    if abs(level_old - level) > hysteresis:
+    if abs(level_old - level) > hysteresis or level == 7 or level == 0:
       level_old = level
       level = int(level)
       set_fanlevel(level)
