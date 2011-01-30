@@ -9,12 +9,14 @@ LOG_FILENAME = "/tmp/tpfan_log.txt"
 timestep=1.0 # in [s] sleep time between samples
 temp_desired = 60
 temp_critical = 90
+hysteresis = 0.6
 ### PID parameters: ###
 p = 0.28
 #####################
  
 # Do not change
 logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
+level_old = 0.0
  
 
 def get_maxtemp():
@@ -65,13 +67,15 @@ while 1:
 
     level = p * error
     print("level = " + str(level))
-    level = int(level)
-    if level > 7:
+    if level > 7.0:
       level = 7
     if level < 0:
       level = 0
-    set_fanlevel(level)
-    print("int(level) = " + str(level))
+    if abs(level_old - level) > hysteresis:
+      level_old = level
+      level = int(level)
+      set_fanlevel(level)
+      print("new level = " + str(level))
 
   except KeyboardInterrupt:                                                                                                                                                                                                           
     print 'Caught Ctrl-c. Preparing for shutdown...'
