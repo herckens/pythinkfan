@@ -6,7 +6,7 @@ import datetime
  
 # Change vars:
 LOG_FILENAME = "/tmp/tpfan_log.txt"
-deamonTIME=1.0 # in [s] sleep time between samples
+timestep=1.0 # in [s] sleep time between samples
 #####################
  
 # Do not change
@@ -14,6 +14,12 @@ logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
  
 
 def get_maxtemp():
+  """
+  Get readings from all temperature sensors.
+  return:
+    maxtemp (the highest of all temperature)
+    temps (vector of all temperature)
+  """
   temps = []
   # check sensors in laptop # not systen specific! great
   st1="cat /proc/acpi/ibm/thermal | awk '{ for (i=2; i<=NF; i++) printf("
@@ -38,6 +44,10 @@ def get_maxtemp():
 
   return maxtemp, temps
 
+def set_fanlevel(level):
+  """ Set the fan to the desired level """
+  ret = os.popen("echo level " + str(level) + " > /proc/acpi/ibm/fan")
+
 
 while 1:
   maxtemp, temps = get_maxtemp() # Read current temperatures
@@ -45,5 +55,6 @@ while 1:
   print maxtemp
 
 
-
-  time.sleep(deamonTIME)
+  level = "auto"
+  set_fanlevel(level)
+  time.sleep(timestep)
