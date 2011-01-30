@@ -7,6 +7,10 @@ import datetime
 # Change vars:
 LOG_FILENAME = "/tmp/tpfan_log.txt"
 timestep=1.0 # in [s] sleep time between samples
+temp_desired = 60
+temp_critical = 90
+### PID parameters: ###
+p = 0.28
 #####################
  
 # Do not change
@@ -50,11 +54,26 @@ def set_fanlevel(level):
 
 
 while 1:
-  maxtemp, temps = get_maxtemp() # Read current temperatures
-  print temps
-  print maxtemp
+  try :
+    time.sleep(timestep)
+    maxtemp, temps = get_maxtemp() # Read current temperatures
+    print(temps)
+    print("maxtemp = " + str(maxtemp))
+    
+    error = maxtemp - temp_desired
+    print("error = " + str(error))
 
+    level = p * error
+    print("level = " + str(level))
+    level = int(level)
+    if level > 7:
+      level = 7
+    if level < 0:
+      level = 0
+    set_fanlevel(level)
+    print("int(level) = " + str(level))
 
-  level = "auto"
-  set_fanlevel(level)
-  time.sleep(timestep)
+  except KeyboardInterrupt:                                                                                                                                                                                                           
+    print 'Caught Ctrl-c. Preparing for shutdown...'
+    set_fanlevel("auto") # TODO Maybe better set to 7 instead of "auto"?!
+    break
