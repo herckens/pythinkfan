@@ -7,12 +7,12 @@ import datetime
 # Change vars:
 LOG_FILENAME = "/tmp/tpfan_log.txt"
 timestep=1.0 # in [s] sleep time between samples
-temp_desired = 60
+temp_desired = 55
 temp_desired_forIntegral = 75
-hysteresis = 0.6
+hysteresis = 0.5
 ### PID parameters: ###
-pid_P = 0.28
-pid_I = 0.01
+pid_P = 0.26
+pid_I = 0.015
 pid_integral_max = 7
 pid_integral_min = 0
 #####################
